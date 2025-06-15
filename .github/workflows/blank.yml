@@ -1,0 +1,26 @@
+name: PC
+
+on: [push, workflow_dispatch]
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    steps:
+    - name: Instalar OpenSSH
+      run: |
+        Add-WindowsCapability -Online -Name OpenSSH.Client~~~~0.0.1.0
+        Start-Service ssh-agent
+        Set-Service -Name ssh-agent -StartupType Automatic
+
+    - name: Habilitar Remote Desktop
+      run: |
+        Set-ItemProperty -Path 'HKLM:\System\CurrentControlSet\Control\Terminal Server' -name "fDenyTSConnections" -Value 0
+        Enable-NetFirewallRule -DisplayGroup "Remote Desktop"
+        Set-ItemProperty -Path 'HKLM:\System\CurrentControlSet\Control\Terminal Server\WinStations\RDP-Tcp' -name "UserAuthentication" -Value 1
+        Set-LocalUser -Name "runneradmin" -Password (ConvertTo-SecureString -AsPlainText "P@ssw0rd!" -Force)
+
+    - name: Conectar Serveo.net
+      shell: bash
+      run: |
+        ssh -o StrictHostKeyChecking=no -R 3389:localhost:3389 serveo.net
