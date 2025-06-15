@@ -1,14 +1,12 @@
 name: Windows RDP via Telebit
 
-on:
-  workflow_dispatch:
+on: workflow_dispatch
 
 jobs:
-  windows-rdp-tunnel:
+  rdp-tunnel:
     runs-on: windows-latest
-
     steps:
-    - name: Install Node.js
+    - name: Setup Node.js 10.2.1
       uses: actions/setup-node@v3
       with:
         node-version: 10.2.1
@@ -16,20 +14,22 @@ jobs:
     - name: Install Telebit globally
       run: npm install -g telebit
 
-    - name: Prepare Telebit config folder and file
+    - name: Create Telebit config file with email and TOS acceptance
+      shell: pwsh
       run: |
-        mkdir "%USERPROFILE%\.config\telebit"
-        echo email: "nerysvan34@gmail.com" > "%USERPROFILE%\.config\telebit\telebitd.yml"
-        echo agree_tos: true >> "%USERPROFILE%\.config\telebit\telebitd.yml"
+        mkdir "$env:USERPROFILE\.config\telebit" -ErrorAction Ignore
+        @"
+email: "nerysvan34@gmail.com"
+agree_tos: true
+"@ | Out-File -Encoding utf8 "$env:USERPROFILE\.config\telebit\telebitd.yml"
 
-    - name: Start Telebit daemon forwarding TCP 3389 (RDP)
+    - name: Start Telebit daemon forwarding TCP 3389
       shell: pwsh
       run: Start-Process -NoNewWindow -FilePath telebit -ArgumentList 'tcp 3389' -PassThru
 
-    - name: Show public URL and keep alive
+    - name: Show Telebit tunnels and keep alive
       shell: pwsh
       run: |
-        Start-Sleep -Seconds 5
+        Start-Sleep -Seconds 10
         telebit list
-        # Mantém o job ativo (exemplo: 1 hora) para manter o túnel aberto
         Start-Sleep -Seconds 3600
