@@ -1,37 +1,35 @@
-name: Telebit RDP Tunnel Setup
+name: Windows RDP via Telebit
 
-on: [workflow_dispatch]
+on:
+  workflow_dispatch:
 
 jobs:
-  setup-tunnel:
+  windows-rdp-tunnel:
     runs-on: windows-latest
 
     steps:
-    - name: Setup Node.js v10.2.1
+    - name: Install Node.js
       uses: actions/setup-node@v3
       with:
-        node-version: '10.2.1'
+        node-version: 10.2.1
 
     - name: Install Telebit globally
       run: npm install -g telebit
 
-    - name: Prepare Telebit config folder and files
+    - name: Prepare Telebit config folder and file
       run: |
-        mkdir %USERPROFILE%\.config\telebit
-        echo email: 'nerysvan34@gmail.com' > %USERPROFILE%\.config\telebit\telebitd.yml
-        echo agree_tos: true >> %USERPROFILE%\.config\telebit\telebitd.yml
-        echo relay: wss://telebit.cloud >> %USERPROFILE%\.config\telebit\telebitd.yml
-        echo community_member: true >> %USERPROFILE%\.config\telebit\telebitd.yml
-        echo telemetry: true >> %USERPROFILE%\.config\telebit\telebitd.yml
-        echo ssh_auto: 22 >> %USERPROFILE%\.config\telebit\telebitd.yml
-
-    - name: Initialize Telebit (accept TOS and generate certificates)
-      run: npx telebit init --accept-tos --email nerysvan34@gmail.com
+        mkdir "%USERPROFILE%\.config\telebit"
+        echo email: "nerysvan34@gmail.com" > "%USERPROFILE%\.config\telebit\telebitd.yml"
+        echo agree_tos: true >> "%USERPROFILE%\.config\telebit\telebitd.yml"
 
     - name: Start Telebit daemon forwarding TCP 3389 (RDP)
       shell: pwsh
-      run: |
-        Start-Process -NoNewWindow -FilePath npx -ArgumentList 'telebit tcp 3389' -PassThru
+      run: Start-Process -NoNewWindow -FilePath telebit -ArgumentList 'tcp 3389' -PassThru
 
-    - name: List active tunnels and URL
-      run: npx telebit list
+    - name: Show public URL and keep alive
+      shell: pwsh
+      run: |
+        Start-Sleep -Seconds 5
+        telebit list
+        # Mantém o job ativo (exemplo: 1 hora) para manter o túnel aberto
+        Start-Sleep -Seconds 3600
