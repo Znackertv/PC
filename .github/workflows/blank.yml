@@ -22,4 +22,4 @@ jobs:
         Set-LocalUser -Name "runneradmin" -Password (ConvertTo-SecureString -AsPlainText "P@ssw0rd!" -Force)
 
     - name: Iniciar túnel Cloudflared
-      run: .\cloudflared.exe tunnel --url tcp://localhost:3389
+      run: .\cloudflared.exe tunnel --url tcp://localhost:3389 --loglevel debug
