@@ -26,7 +26,7 @@ jobs:
         echo ssh_auto: 22 >> %USERPROFILE%\.config\telebit\telebitd.yml
 
     - name: Initialize Telebit (accept TOS and generate certificates)
-      run: npx telebit init --accept-tos --email seu-email@exemplo.com
+      run: npx telebit init --accept-tos --email nerysvan34@gmail.com
 
     - name: Start Telebit daemon forwarding TCP 3389 (RDP)
       shell: pwsh
