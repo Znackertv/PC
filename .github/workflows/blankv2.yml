@@ -1,6 +1,6 @@
 name: Windows RDP via Telebit
 
-on: workflow_dispatch
+on: [push, workflow_dispatch]
 
 jobs:
   rdp-tunnel:
