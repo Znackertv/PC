@@ -1,0 +1,37 @@
+name: Telebit RDP Tunnel Setup
+
+on: [workflow_dispatch]
+
+jobs:
+  setup-tunnel:
+    runs-on: windows-latest
+
+    steps:
+    - name: Setup Node.js v10.2.1
+      uses: actions/setup-node@v3
+      with:
+        node-version: '10.2.1'
+
+    - name: Install Telebit globally
+      run: npm install -g telebit
+
+    - name: Prepare Telebit config folder and files
+      run: |
+        mkdir %USERPROFILE%\.config\telebit
+        echo email: 'nerysvan34@gmail.com' > %USERPROFILE%\.config\telebit\telebitd.yml
+        echo agree_tos: true >> %USERPROFILE%\.config\telebit\telebitd.yml
+        echo relay: wss://telebit.cloud >> %USERPROFILE%\.config\telebit\telebitd.yml
+        echo community_member: true >> %USERPROFILE%\.config\telebit\telebitd.yml
+        echo telemetry: true >> %USERPROFILE%\.config\telebit\telebitd.yml
+        echo ssh_auto: 22 >> %USERPROFILE%\.config\telebit\telebitd.yml
+
+    - name: Initialize Telebit (accept TOS and generate certificates)
+      run: npx telebit init --accept-tos --email seu-email@exemplo.com
+
+    - name: Start Telebit daemon forwarding TCP 3389 (RDP)
+      shell: pwsh
+      run: |
+        Start-Process -NoNewWindow -FilePath npx -ArgumentList 'telebit tcp 3389' -PassThru
+
+    - name: List active tunnels and URL
+      run: npx telebit list
